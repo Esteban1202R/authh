@@ -22,23 +22,32 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
     }
 
     @Override
-    public Usuario guardarUsuario(Usuario Usuario) {
-        return null;
+    public Usuario guardarUsuario(Usuario usuario) {
+        return guardar(usuario);
     }
 
     @Override
     public Usuario buscarPorIdUsuario(String idUsuario) {
-        return null;
+        return repository.findById(idUsuario)
+                .map(mapperUsuario::toUsuario)
+                .orElse(new Usuario());
     }
 
     @Override
-    public Usuario ActualizarUsuario(Usuario Usuario) {
-        return null;
+    public Usuario ActualizarUsuario(Usuario usuario) {
+        return guardar(usuario);
     }
 
     @Override
     public void eliminarPorUsuario(String idUsuario) {
+        repository.deleteById(idUsuario);
+    }
 
+    @Override
+    public Usuario buscarPorCorreo(String correo) {
+        return repository.findFirstByCorreo(correo)
+                .map(mapperUsuario::toUsuario)
+                .orElse(new Usuario());
     }
 
 

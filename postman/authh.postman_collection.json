@@ -1,0 +1,544 @@
+{
+  "info": {
+    "name": "authh - API Usuarios",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "claveAleatoria",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "correoAleatorio",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ultimoUsuarioId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Caso valido",
+      "item": [
+        {
+          "name": "Guardar usuario valido",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';",
+                  "let clave = '';",
+                  "for (let i = 0; i < 10; i++) {",
+                  "    clave += chars.charAt(Math.floor(Math.random() * chars.length));",
+                  "}",
+                  "pm.collectionVariables.set('claveAleatoria', clave);",
+                  "pm.collectionVariables.set('correoAleatorio', 'u' + (Date.now() % 1000000) + '@t.co');"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Devuelve el usuario con un id generado', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.id).to.not.be.null;",
+                  "    pm.expect(body.id).to.be.a('string').and.to.have.length.above(0);",
+                  "});",
+                  "",
+                  "pm.test('Conserva los datos enviados', function () {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.nombre).to.eql('Esteban');",
+                  "    pm.expect(body.edad).to.eql(20);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('ultimoUsuarioId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Esteban\",\n  \"correo\": \"{{correoAleatorio}}\",\n  \"clave\": \"{{claveAleatoria}}\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 20\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Validaciones de negocio",
+      "item": [
+        {
+          "name": "Menor de edad (edad < 18)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('No acepta menores de edad', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(200);",
+                  "});",
+                  "",
+                  "pm.test('El mensaje menciona el motivo', function () {",
+                  "    pm.expect(pm.response.text().toLowerCase()).to.include('menor');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Juan\",\n  \"correo\": \"juan@test.com\",\n  \"clave\": \"claveSegura\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 17\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Correo con formato invalido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza un correo sin arroba ni dominio', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Ana\",\n  \"correo\": \"noesuncorreo\",\n  \"clave\": \"claveSegura\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 25\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clave demasiado corta (< 8)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Exige minimo 8 caracteres en la clave', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Luis\",\n  \"correo\": \"luis@test.com\",\n  \"clave\": \"corta\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Nombre vacio",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('El nombre no puede ser solo espacios', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"   \",\n  \"correo\": \"vacio@test.com\",\n  \"clave\": \"claveSegura\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Correo ausente (null)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza la peticion sin correo', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sin Correo\",\n  \"clave\": \"claveSegura\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Edad ausente (null)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Rechaza la peticion sin edad con un error claro', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(200);",
+                  "});",
+                  "",
+                  "pm.test('No estalla con un 500', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Sin Edad\",\n  \"correo\": \"sinedad@test.com\",\n  \"clave\": \"claveSegura\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Limites de la base de datos",
+      "item": [
+        {
+          "name": "Correo mas largo que 20 caracteres",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('No revienta con un correo largo', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Correo Largo\",\n  \"correo\": \"un.correo.bastante.largo@dominio-ejemplo.com\",\n  \"clave\": \"claveSegura\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 28\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clave mas larga que 12 caracteres",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('No revienta con una clave larga', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Clave Larga\",\n  \"correo\": \"clavelarga@test.com\",\n  \"clave\": \"estaClaveEsMuyLargaDeVerdad\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 28\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Clave repetida (restriccion UNIQUE)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Dos usuarios distintos pueden compartir contrasena', function () {",
+                  "    pm.expect(pm.response.code).to.not.eql(500);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Clave Repetida\",\n  \"correo\": \"repetida@test.com\",\n  \"clave\": \"claveFija123\",\n  \"rol\": \"USER\",\n  \"numerodecelular\": \"3001234567\",\n  \"edad\": 28\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/ecommerce/usuario/save",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "ecommerce",
+                "usuario",
+                "save"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

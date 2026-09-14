@@ -38,6 +38,40 @@ public class UsuarioUseCase {
 
     }
 
+    public Usuario buscarPorIdUsuario(String idUsuario) {
+        return usuarioGateway.buscarPorIdUsuario(idUsuario);
+    }
+
+    public void eliminarPorIdUsuario(String idUsuario) {
+        Usuario usuarioExistente = usuarioGateway.buscarPorIdUsuario(idUsuario);
+
+        if (usuarioExistente.getId() == null) {
+            throw new RuntimeException("El usuario no existe");
+        }
+
+        usuarioGateway.eliminarPorUsuario(idUsuario);
+    }
+
+    public Usuario actualizaUsuario(Usuario usuario) {
+        Usuario usuarioExistente = usuarioGateway.buscarPorIdUsuario(usuario.getId());
+
+        if (usuarioExistente.getId() == null) {
+            throw new RuntimeException("El usuario no existe");
+        }
+
+        return usuarioGateway.ActualizarUsuario(usuario);
+    }
+
+    public String loginUsuario(String correo, String clave) {
+        Usuario usuario = usuarioGateway.buscarPorCorreo(correo);
+
+        if (usuario.getId() == null || !usuario.getClave().equals(clave)) {
+            throw new RuntimeException("Credenciales incorrectas");
+        }
+
+        return "Usuario logueado exitosamente";
+    }
+
     private void validarFormatoCorreo(String correo) {
         Optional.of(correo)
                 .map(String::trim)
