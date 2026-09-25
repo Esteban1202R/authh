@@ -30,7 +30,7 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> findByIdUsuario(@PathVariable String id){
+    public ResponseEntity<Usuario> findByIdUsuario(@PathVariable Long id){
         Usuario usuarioValidadoEncontrado = usuarioUseCase.buscarPorIdUsuario(id);
 
         if(usuarioValidadoEncontrado.getId() != null){
@@ -41,7 +41,7 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteById(@PathVariable String id){
+    public ResponseEntity<String> deleteById(@PathVariable Long id){
         try{
             usuarioUseCase.eliminarPorIdUsuario(id);
             return ResponseEntity.ok().body("Usuario eliminado exitosamente");
@@ -58,16 +58,6 @@ public class UsuarioController {
             return new ResponseEntity<>(usuarioValidadActualizado, HttpStatus.OK);
         }catch (Exception error){
             return ResponseEntity.notFound().build();
-        }
-    }
-
-    @PostMapping("/login")
-    public ResponseEntity<?> loginUsuario(@RequestBody UsuarioData usuarioData){
-        try{
-            String mensajeRespuesta = usuarioUseCase.loginUsuario(usuarioData.getCorreo(),usuarioData.getClave());
-            return new ResponseEntity<>(mensajeRespuesta, HttpStatus.OK);
-        } catch (Exception error){
-            return new ResponseEntity<>("Falló el logueo", HttpStatus.CONFLICT);
         }
     }
 

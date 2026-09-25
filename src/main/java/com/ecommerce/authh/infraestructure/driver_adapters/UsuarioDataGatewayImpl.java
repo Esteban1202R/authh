@@ -27,7 +27,7 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
     }
 
     @Override
-    public Usuario buscarPorIdUsuario(String idUsuario) {
+    public Usuario buscarPorIdUsuario(Long idUsuario) {
         return repository.findById(idUsuario)
                 .map(mapperUsuario::toUsuario)
                 .orElse(new Usuario());
@@ -39,15 +39,8 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
     }
 
     @Override
-    public void eliminarPorUsuario(String idUsuario) {
+    public void eliminarPorUsuario(Long idUsuario) {
         repository.deleteById(idUsuario);
-    }
-
-    @Override
-    public Usuario buscarPorCorreo(String correo) {
-        return repository.findFirstByCorreo(correo)
-                .map(mapperUsuario::toUsuario)
-                .orElse(new Usuario());
     }
 
 

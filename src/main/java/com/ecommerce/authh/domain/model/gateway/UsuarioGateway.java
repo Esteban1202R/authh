@@ -5,10 +5,9 @@ import com.ecommerce.authh.domain.model.Usuario;
 public interface UsuarioGateway {
 
     Usuario guardarUsuario(Usuario Usuario);
-    Usuario buscarPorIdUsuario(String idUsuario);
+    Usuario buscarPorIdUsuario(Long idUsuario);
     Usuario ActualizarUsuario (Usuario Usuario);
-    void eliminarPorUsuario(String idUsuario);
-    Usuario buscarPorCorreo(String correo);
+    void eliminarPorUsuario(Long idUsuario);
 
     Usuario guardar(Usuario usuario);
 }
