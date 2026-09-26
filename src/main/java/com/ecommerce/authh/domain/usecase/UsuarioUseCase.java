@@ -1,7 +1,6 @@
 package com.ecommerce.authh.domain.usecase;
 
 import com.ecommerce.authh.domain.model.Usuario;
-import com.ecommerce.authh.domain.model.gateway.EncrypterGateway;
 import com.ecommerce.authh.domain.model.gateway.UsuarioGateway;
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +16,6 @@ import java.util.Optional;
 public class UsuarioUseCase {
 
     private final UsuarioGateway usuarioGateway;
-    private final EncrypterGateway encrypterGateway;
 
     public Usuario guardarUsuario(Usuario usuario) {
 
@@ -34,9 +32,6 @@ public class UsuarioUseCase {
         validarFormatoCorreo(usuario.getCorreo());
         validarClave(usuario.getClave());
         validarNombre(usuario.getNombre());
-
-        String claveEncriptada = encrypterGateway.encrypt(usuario.getClave());
-        usuario.setClave(claveEncriptada);
 
         Usuario usuarioGuardado = usuarioGateway.guardarUsuario(usuario);
         return usuarioGuardado;
@@ -64,10 +59,17 @@ public class UsuarioUseCase {
             throw new RuntimeException("El usuario no existe");
         }
 
-        String claveEncriptada = encrypterGateway.encrypt(usuario.getClave());
-        usuario.setClave(claveEncriptada);
-
         return usuarioGateway.ActualizarUsuario(usuario);
+    }
+
+    public String loginUsuario(String correo, String clave) {
+        Usuario usuario = usuarioGateway.buscarPorCorreo(correo);
+
+        if (usuario.getId() == null || !usuario.getClave().equals(clave)) {
+            throw new RuntimeException("Credenciales incorrectas");
+        }
+
+        return "Usuario logueado exitosamente";
     }
 
     private void validarFormatoCorreo(String correo) {

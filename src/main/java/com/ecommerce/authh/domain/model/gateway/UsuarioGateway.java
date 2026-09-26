@@ -8,6 +8,7 @@ public interface UsuarioGateway {
     Usuario buscarPorIdUsuario(Long idUsuario);
     Usuario ActualizarUsuario (Usuario Usuario);
     void eliminarPorUsuario(Long idUsuario);
+    Usuario buscarPorCorreo(String correo);
 
     Usuario guardar(Usuario usuario);
 }

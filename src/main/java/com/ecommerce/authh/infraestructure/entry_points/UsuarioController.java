@@ -61,4 +61,14 @@ public class UsuarioController {
         }
     }
 
+    @PostMapping("/login")
+    public ResponseEntity<?> loginUsuario(@RequestBody UsuarioData usuarioData){
+        try{
+            String mensajeRespuesta = usuarioUseCase.loginUsuario(usuarioData.getCorreo(),usuarioData.getClave());
+            return new ResponseEntity<>(mensajeRespuesta, HttpStatus.OK);
+        } catch (Exception error){
+            return new ResponseEntity<>("Falló el logueo", HttpStatus.CONFLICT);
+        }
+    }
+
 }

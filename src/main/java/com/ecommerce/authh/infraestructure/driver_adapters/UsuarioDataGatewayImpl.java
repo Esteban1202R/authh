@@ -43,6 +43,13 @@ public class UsuarioDataGatewayImpl implements UsuarioGateway {
         repository.deleteById(idUsuario);
     }
 
+    @Override
+    public Usuario buscarPorCorreo(String correo) {
+        return repository.findFirstByCorreo(correo)
+                .map(mapperUsuario::toUsuario)
+                .orElse(new Usuario());
+    }
+
 
 
 
