@@ -61,13 +61,15 @@ public class UsuarioController {
         }
     }
 
+//el requestbody convierte la informacion del Json a objeto la que se trae de postman
+
     @PostMapping("/login")
     public ResponseEntity<?> loginUsuario(@RequestBody UsuarioData usuarioData){
         try{
             String mensajeRespuesta = usuarioUseCase.loginUsuario(usuarioData.getCorreo(),usuarioData.getClave());
             return new ResponseEntity<>(mensajeRespuesta, HttpStatus.OK);
         } catch (Exception error){
-            return new ResponseEntity<>("Falló el logueo", HttpStatus.CONFLICT);
+            return new ResponseEntity<>("Falló el logueo", HttpStatus.OK);
         }
     }
 
