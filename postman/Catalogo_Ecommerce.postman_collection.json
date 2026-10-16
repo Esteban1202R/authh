@@ -1,0 +1,508 @@
+{
+  "info": {
+    "name": "E-commerce - Catalogo y Carrito",
+    "description": "Microservicio Catalogo (8081) y las APIs de saldo de Auth (8080).\n\nOrden sugerido: 1) crear productos, 2) recargar saldo, 3) crear carrito, 4) agregar productos, 5) comprar.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "authUrl",
+      "value": "http://localhost:8080/api/ecommerce/usuario",
+      "type": "string"
+    },
+    {
+      "key": "catalogoUrl",
+      "value": "http://localhost:8081/api/ecommerce",
+      "type": "string"
+    },
+    {
+      "key": "idUsuario",
+      "value": "7",
+      "type": "string"
+    },
+    {
+      "key": "idProducto",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "monto",
+      "value": "250000",
+      "type": "string"
+    },
+    {
+      "key": "cantidad",
+      "value": "2",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Saldo (Auth)",
+      "item": [
+        {
+          "name": "Consultar saldo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/saldo/{{idUsuario}}",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "saldo",
+                "{{idUsuario}}"
+              ]
+            },
+            "description": "Devuelve el saldo disponible del usuario."
+          }
+        },
+        {
+          "name": "Recargar saldo",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/saldo/recargar/{{idUsuario}}/{{monto}}",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "saldo",
+                "recargar",
+                "{{idUsuario}}",
+                "{{monto}}"
+              ]
+            },
+            "description": "Suma dinero al saldo. El monto debe ser mayor que cero."
+          }
+        },
+        {
+          "name": "Descontar saldo",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/saldo/descontar/{{idUsuario}}/{{monto}}",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "saldo",
+                "descontar",
+                "{{idUsuario}}",
+                "{{monto}}"
+              ]
+            },
+            "description": "Descuenta dinero. Es la que llama Catalogo al confirmar una compra. Falla con 409 si el saldo no alcanza."
+          }
+        },
+        {
+          "name": "Recargar monto invalido (rechazo)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{authUrl}}/saldo/recargar/{{idUsuario}}/-50",
+              "host": [
+                "{{authUrl}}"
+              ],
+              "path": [
+                "saldo",
+                "recargar",
+                "{{idUsuario}}",
+                "-50"
+              ]
+            },
+            "description": "Debe responder 409: El monto debe ser mayor que cero."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Productos",
+      "item": [
+        {
+          "name": "Crear producto",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    pm.collectionVariables.set('idProducto', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Mouse inalambrico\",\n  \"descripcion\": \"Mouse bluetooth\",\n  \"precio\": 45000,\n  \"stock\": 10,\n  \"imagenUrl\": \"https://commons.wikimedia.org/wiki/Special:FilePath/Computer-mouse.jpg?width=500\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{catalogoUrl}}/producto/save",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "producto",
+                "save"
+              ]
+            },
+            "description": "Crea un producto. Guarda el id en la variable idProducto."
+          }
+        },
+        {
+          "name": "Crear producto 2 (audifonos)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Audifonos Bluetooth\",\n  \"descripcion\": \"Over ear con cancelacion de ruido\",\n  \"precio\": 80000,\n  \"stock\": 5,\n  \"imagenUrl\": \"https://commons.wikimedia.org/wiki/Special:FilePath/Headphones.jpg?width=500\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{catalogoUrl}}/producto/save",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "producto",
+                "save"
+              ]
+            },
+            "description": "El segundo producto del ejemplo del PDF, con imagen real."
+          }
+        },
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/producto/all",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "producto",
+                "all"
+              ]
+            },
+            "description": "Devuelve todos los productos con su precio y stock."
+          }
+        },
+        {
+          "name": "Buscar producto por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/producto/{{idProducto}}",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "producto",
+                "{{idProducto}}"
+              ]
+            },
+            "description": "Devuelve un producto. 404 si no existe."
+          }
+        },
+        {
+          "name": "Actualizar producto",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{idProducto}},\n  \"nombre\": \"Mouse inalambrico\",\n  \"descripcion\": \"Mouse bluetooth edicion 2026\",\n  \"precio\": 48000,\n  \"stock\": 15,\n  \"imagenUrl\": \"https://commons.wikimedia.org/wiki/Special:FilePath/Computer-mouse.jpg?width=500\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{catalogoUrl}}/producto/update",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "producto",
+                "update"
+              ]
+            },
+            "description": "El id va DENTRO del body, no en la URL."
+          }
+        },
+        {
+          "name": "Eliminar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/producto/{{idProducto}}",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "producto",
+                "{{idProducto}}"
+              ]
+            },
+            "description": "Elimina el producto. 404 si no existe."
+          }
+        },
+        {
+          "name": "Crear con precio 0 (rechazo)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Producto malo\",\n  \"descripcion\": \"prueba de validacion\",\n  \"precio\": 0,\n  \"stock\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{catalogoUrl}}/producto/save",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "producto",
+                "save"
+              ]
+            },
+            "description": "Debe responder 409: El precio debe ser mayor que cero."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Carrito",
+      "item": [
+        {
+          "name": "Crear carrito",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/crear/{{idUsuario}}",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "crear",
+                "{{idUsuario}}"
+              ]
+            },
+            "description": "Asigna un carrito al usuario. 409 si ya tiene uno activo o si el usuario no existe."
+          }
+        },
+        {
+          "name": "Ver carrito",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/{{idUsuario}}",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "{{idUsuario}}"
+              ]
+            },
+            "description": "Devuelve los items, el subtotal de cada uno y el total general."
+          }
+        },
+        {
+          "name": "Agregar producto",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/agregar/{{idUsuario}}/{{idProducto}}/{{cantidad}}",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "agregar",
+                "{{idUsuario}}",
+                "{{idProducto}}",
+                "{{cantidad}}"
+              ]
+            },
+            "description": "Agrega al carrito. Si el producto ya estaba, suma la cantidad. No descuenta inventario."
+          }
+        },
+        {
+          "name": "Actualizar cantidad",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/actualizar/{{idUsuario}}/{{idProducto}}/1",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "actualizar",
+                "{{idUsuario}}",
+                "{{idProducto}}",
+                "1"
+              ]
+            },
+            "description": "Reemplaza la cantidad de ese producto en el carrito."
+          }
+        },
+        {
+          "name": "Quitar producto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/quitar/{{idUsuario}}/{{idProducto}}",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "quitar",
+                "{{idUsuario}}",
+                "{{idProducto}}"
+              ]
+            },
+            "description": "Retira el producto del carrito y recalcula el total."
+          }
+        },
+        {
+          "name": "COMPRAR",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/comprar/{{idUsuario}}",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "comprar",
+                "{{idUsuario}}"
+              ]
+            },
+            "description": "Valida usuario, stock y saldo. Si todo pasa: descuenta el saldo en Auth, baja el stock y deja el carrito en COMPRADO."
+          }
+        },
+        {
+          "name": "Agregar cantidad 0 (rechazo)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/agregar/{{idUsuario}}/{{idProducto}}/0",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "agregar",
+                "{{idUsuario}}",
+                "{{idProducto}}",
+                "0"
+              ]
+            },
+            "description": "Debe responder 409: La cantidad debe ser mayor que cero."
+          }
+        },
+        {
+          "name": "Agregar mas que el stock (rechazo)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/agregar/{{idUsuario}}/{{idProducto}}/9999",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "agregar",
+                "{{idUsuario}}",
+                "{{idProducto}}",
+                "9999"
+              ]
+            },
+            "description": "Debe responder 409: Stock insuficiente para el producto X."
+          }
+        },
+        {
+          "name": "Carrito de usuario inexistente (rechazo)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{catalogoUrl}}/carrito/crear/999",
+              "host": [
+                "{{catalogoUrl}}"
+              ],
+              "path": [
+                "carrito",
+                "crear",
+                "999"
+              ]
+            },
+            "description": "Catalogo le pregunta a Auth por el usuario 999. Debe responder 409: El usuario no existe."
+          }
+        }
+      ]
+    }
+  ]
+}
