@@ -15,7 +15,8 @@ public class MapperUsuario {
                 usuarioData.getClave(),
                 usuarioData.getRol(),
                 usuarioData.getNumerodecelular(),
-                usuarioData.getEdad()
+                usuarioData.getEdad(),
+                usuarioData.getSaldo()
         );
     }
 
@@ -27,7 +28,8 @@ public class MapperUsuario {
                 usuario.getClave(),
                 usuario.getRol(),
                 usuario.getNumerodecelular(),
-                usuario.getEdad()
+                usuario.getEdad(),
+                usuario.getSaldo()
         );
     }
 }

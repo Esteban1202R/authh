@@ -38,6 +38,9 @@ public class UsuarioUseCase {
         String claveEncriptada = encrypterGateway.encrypt(usuario.getClave());
         usuario.setClave(claveEncriptada);
 
+        // El saldo no se asigna desde el CRUD: todo usuario nuevo nace en cero
+        usuario.setSaldo(0.0);
+
         Usuario usuarioGuardado = usuarioGateway.guardarUsuario(usuario);
         return usuarioGuardado;
 
@@ -67,7 +70,55 @@ public class UsuarioUseCase {
         String claveEncriptada = encrypterGateway.encrypt(usuario.getClave());
         usuario.setClave(claveEncriptada);
 
+        // El CRUD no puede tocar el saldo: se conserva el que ya tenia
+        usuario.setSaldo(usuarioExistente.getSaldo());
+
         return usuarioGateway.ActualizarUsuario(usuario);
+    }
+
+    public Double consultarSaldo(Long idUsuario) {
+        Usuario usuario = usuarioGateway.buscarPorIdUsuario(idUsuario);
+
+        if (usuario.getId() == null) {
+            throw new RuntimeException("El usuario no existe");
+        }
+
+        return usuario.getSaldo();
+    }
+
+    public Usuario recargarSaldo(Long idUsuario, Double monto) {
+        Usuario usuario = buscarUsuarioParaSaldo(idUsuario, monto);
+
+        usuario.setSaldo(usuario.getSaldo() + monto);
+
+        return usuarioGateway.ActualizarUsuario(usuario);
+    }
+
+    public Usuario descontarSaldo(Long idUsuario, Double monto) {
+        Usuario usuario = buscarUsuarioParaSaldo(idUsuario, monto);
+
+        if (usuario.getSaldo() < monto) {
+            throw new RuntimeException("Saldo insuficiente");
+        }
+
+        usuario.setSaldo(usuario.getSaldo() - monto);
+
+        return usuarioGateway.ActualizarUsuario(usuario);
+    }
+
+    // Comprobaciones que comparten recargar y descontar
+    private Usuario buscarUsuarioParaSaldo(Long idUsuario, Double monto) {
+        Usuario usuario = usuarioGateway.buscarPorIdUsuario(idUsuario);
+
+        if (usuario.getId() == null) {
+            throw new RuntimeException("El usuario no existe");
+        }
+
+        if (monto == null || monto <= 0) {
+            throw new IllegalArgumentException("El monto debe ser mayor que cero");
+        }
+
+        return usuario;
     }
 
     public String loginUsuario(String correo, String clave) {

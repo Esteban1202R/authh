@@ -73,4 +73,34 @@ public class UsuarioController {
         }
     }
 
+    @GetMapping("/saldo/{id}")
+    public ResponseEntity<?> consultarSaldo(@PathVariable Long id){
+        try{
+            Double saldo = usuarioUseCase.consultarSaldo(id);
+            return new ResponseEntity<>(saldo, HttpStatus.OK);
+        } catch (Exception error){
+            return new ResponseEntity<>(error.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/saldo/recargar/{id}/{monto}")
+    public ResponseEntity<?> recargarSaldo(@PathVariable Long id, @PathVariable Double monto){
+        try{
+            Usuario usuario = usuarioUseCase.recargarSaldo(id, monto);
+            return new ResponseEntity<>(usuario, HttpStatus.OK);
+        } catch (Exception error){
+            return new ResponseEntity<>(error.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
+    @PutMapping("/saldo/descontar/{id}/{monto}")
+    public ResponseEntity<?> descontarSaldo(@PathVariable Long id, @PathVariable Double monto){
+        try{
+            Usuario usuario = usuarioUseCase.descontarSaldo(id, monto);
+            return new ResponseEntity<>(usuario, HttpStatus.OK);
+        } catch (Exception error){
+            return new ResponseEntity<>(error.getMessage(), HttpStatus.CONFLICT);
+        }
+    }
+
 }

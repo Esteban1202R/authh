@@ -17,14 +17,13 @@ public class UsuarioData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nombre;
-    @Column(length = 40)
+    @Column(length = 40, nullable = false, unique = true)
     private String correo;
-    @Column(nullable = false)
     private String clave;
     private String rol;
     private String numerodecelular;
     private Integer edad;
-
-
+    @Column(nullable = false)
+    private Double saldo;
 
 }

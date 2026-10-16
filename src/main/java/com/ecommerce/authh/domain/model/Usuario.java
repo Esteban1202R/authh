@@ -19,5 +19,6 @@ public class Usuario {
     private String rol;
     private String numerodecelular;
     private Integer edad;
+    private Double saldo;
 
     }
