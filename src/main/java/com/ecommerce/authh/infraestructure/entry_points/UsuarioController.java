@@ -1,5 +1,7 @@
 package com.ecommerce.authh.infraestructure.entry_points;
 
+import com.ecommerce.authh.domain.exception.NoEncontradoException;
+import com.ecommerce.authh.domain.exception.ValidacionNegocioException;
 import com.ecommerce.authh.domain.model.Usuario;
 import com.ecommerce.authh.domain.usecase.UsuarioUseCase;
 import com.ecommerce.authh.infraestructure.driver_adapters.UsuarioData;
@@ -18,15 +20,20 @@ public class UsuarioController {
     private final MapperUsuario mapperUsuario;
 
     @PostMapping("/save")
-    public ResponseEntity<Usuario> saveUsuario(@RequestBody UsuarioData usuarioData){
-        Usuario usuario = mapperUsuario.toUsuario(usuarioData);
-        Usuario usuarioValidadoGuardado = usuarioUseCase.guardarUsuario(usuario);
+    public ResponseEntity<?> saveUsuario(@RequestBody UsuarioData usuarioData){
+        try{
+            Usuario usuario = mapperUsuario.toUsuario(usuarioData);
+            Usuario usuarioValidadoGuardado = usuarioUseCase.guardarUsuario(usuario);
 
-        if(usuarioValidadoGuardado.getId() != null){
-            return new ResponseEntity<>(usuarioValidadoGuardado, HttpStatus.OK);
+            if(usuarioValidadoGuardado.getId() != null){
+                return new ResponseEntity<>(usuarioValidadoGuardado, HttpStatus.OK);
+            }
+
+            return new ResponseEntity<>(usuarioValidadoGuardado, HttpStatus.CONFLICT);
+        } catch (ValidacionNegocioException reglaDeNegocio){
+            // El sistema valido bien: se informa el motivo con 200
+            return new ResponseEntity<>(reglaDeNegocio.getMessage(), HttpStatus.OK);
         }
-
-        return new ResponseEntity<>(usuarioValidadoGuardado, HttpStatus.CONFLICT);
     }
 
     @GetMapping("/{id}")
@@ -88,8 +95,10 @@ public class UsuarioController {
         try{
             Usuario usuario = usuarioUseCase.recargarSaldo(id, monto);
             return new ResponseEntity<>(usuario, HttpStatus.OK);
-        } catch (Exception error){
-            return new ResponseEntity<>(error.getMessage(), HttpStatus.CONFLICT);
+        } catch (ValidacionNegocioException reglaDeNegocio){
+            return new ResponseEntity<>(reglaDeNegocio.getMessage(), HttpStatus.OK);
+        } catch (NoEncontradoException noExiste){
+            return new ResponseEntity<>(noExiste.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -98,8 +107,10 @@ public class UsuarioController {
         try{
             Usuario usuario = usuarioUseCase.descontarSaldo(id, monto);
             return new ResponseEntity<>(usuario, HttpStatus.OK);
-        } catch (Exception error){
-            return new ResponseEntity<>(error.getMessage(), HttpStatus.CONFLICT);
+        } catch (ValidacionNegocioException reglaDeNegocio){
+            return new ResponseEntity<>(reglaDeNegocio.getMessage(), HttpStatus.OK);
+        } catch (NoEncontradoException noExiste){
+            return new ResponseEntity<>(noExiste.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 

@@ -1,5 +1,7 @@
 package com.ecommerce.authh.domain.usecase;
 
+import com.ecommerce.authh.domain.exception.NoEncontradoException;
+import com.ecommerce.authh.domain.exception.ValidacionNegocioException;
 import com.ecommerce.authh.domain.model.Usuario;
 import com.ecommerce.authh.domain.model.gateway.EncrypterGateway;
 import com.ecommerce.authh.domain.model.gateway.UsuarioGateway;
@@ -23,11 +25,11 @@ public class UsuarioUseCase {
 
         if (usuario.getCorreo() == null || usuario.getClave() == null){
 
-            throw new NullPointerException("Hay campos vacios");
+            throw new ValidacionNegocioException("Hay campos vacios");
         }
 
         if(usuario.getEdad() < 18){
-            throw new RuntimeException("Menor de edad");
+            throw new ValidacionNegocioException("Menor de edad");
         }
 
 
@@ -54,7 +56,7 @@ public class UsuarioUseCase {
         Usuario usuarioExistente = usuarioGateway.buscarPorIdUsuario(idUsuario);
 
         if (usuarioExistente.getId() == null) {
-            throw new RuntimeException("El usuario no existe");
+            throw new NoEncontradoException("El usuario no existe");
         }
 
         usuarioGateway.eliminarPorUsuario(idUsuario);
@@ -64,7 +66,7 @@ public class UsuarioUseCase {
         Usuario usuarioExistente = usuarioGateway.buscarPorIdUsuario(usuario.getId());
 
         if (usuarioExistente.getId() == null) {
-            throw new RuntimeException("El usuario no existe");
+            throw new NoEncontradoException("El usuario no existe");
         }
 
         String claveEncriptada = encrypterGateway.encrypt(usuario.getClave());
@@ -80,7 +82,7 @@ public class UsuarioUseCase {
         Usuario usuario = usuarioGateway.buscarPorIdUsuario(idUsuario);
 
         if (usuario.getId() == null) {
-            throw new RuntimeException("El usuario no existe");
+            throw new NoEncontradoException("El usuario no existe");
         }
 
         return usuario.getSaldo();
@@ -98,7 +100,7 @@ public class UsuarioUseCase {
         Usuario usuario = buscarUsuarioParaSaldo(idUsuario, monto);
 
         if (usuario.getSaldo() < monto) {
-            throw new RuntimeException("Saldo insuficiente");
+            throw new ValidacionNegocioException("Saldo insuficiente");
         }
 
         usuario.setSaldo(usuario.getSaldo() - monto);
@@ -111,11 +113,11 @@ public class UsuarioUseCase {
         Usuario usuario = usuarioGateway.buscarPorIdUsuario(idUsuario);
 
         if (usuario.getId() == null) {
-            throw new RuntimeException("El usuario no existe");
+            throw new NoEncontradoException("El usuario no existe");
         }
 
         if (monto == null || monto <= 0) {
-            throw new IllegalArgumentException("El monto debe ser mayor que cero");
+            throw new ValidacionNegocioException("El monto debe ser mayor que cero");
         }
 
         return usuario;
@@ -125,7 +127,7 @@ public class UsuarioUseCase {
         Usuario usuario = usuarioGateway.buscarPorCorreo(correo);
 
         if (usuario.getId() == null || !encrypterGateway.checkPass(clave, usuario.getClave())) {
-            throw new RuntimeException("Credenciales incorrectas");
+            throw new ValidacionNegocioException("Credenciales incorrectas");
         }
 
         return "Usuario logueado exitosamente";
@@ -136,14 +138,14 @@ public class UsuarioUseCase {
                 .map(String::trim)
                 .filter(c -> !c.isEmpty())
                 .filter(c -> c.matches("^[\\w.+-]+@[\\w-]+\\.[\\w.]+$"))
-                .orElseThrow(() -> new IllegalArgumentException("El correo no tiene un formato valido"));
+                .orElseThrow(() -> new ValidacionNegocioException("El correo no tiene un formato valido"));
     }
 
     // Clave con longitud minima de 8 caracteres
     private void validarClave(String clave) {
         Optional.of(clave)
                 .filter(c -> c.length() >= 8)
-                .orElseThrow(() -> new IllegalArgumentException("La clave debe tener al menos 8 caracteres"));
+                .orElseThrow(() -> new ValidacionNegocioException("La clave debe tener al menos 8 caracteres"));
     }
 
     // Nombre obligatorio y no vacio
@@ -151,6 +153,6 @@ public class UsuarioUseCase {
         Optional.ofNullable(nombre)
                 .map(String::trim)
                 .filter(n -> !n.isEmpty())
-                .orElseThrow(() -> new IllegalArgumentException("El nombre es obligatorio"));
+                .orElseThrow(() -> new ValidacionNegocioException("El nombre es obligatorio"));
     }
 }
