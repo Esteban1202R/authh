@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// Copia local de los datos que catalogo necesita del microservicio de autenticacion
+// datos del usuario que trae auth
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter

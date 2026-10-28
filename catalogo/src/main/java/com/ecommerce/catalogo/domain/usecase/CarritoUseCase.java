@@ -24,7 +24,7 @@ public class CarritoUseCase {
     private final ProductoGateway productoGateway;
     private final UsuarioGateway usuarioGateway;
 
-    // Asigna un carrito a un usuario existente. Solo puede tener uno activo.
+    // solo un carrito activo por usuario
     public Carrito crearCarrito(Long idUsuario) {
         Usuario usuario = usuarioGateway.buscarPorIdUsuario(idUsuario);
 
@@ -57,7 +57,7 @@ public class CarritoUseCase {
         return carrito;
     }
 
-    // Agregar al carrito no descuenta inventario ni cobra: solo reserva la intencion
+    // agregar no descuenta stock ni cobra
     public Carrito agregarProducto(Long idUsuario, Long idProducto, Integer cantidad) {
         Carrito carrito = consultarCarrito(idUsuario);
         Producto producto = buscarProductoExistente(idProducto);
@@ -66,7 +66,7 @@ public class CarritoUseCase {
 
         ItemCarrito itemExistente = buscarItem(carrito, idProducto);
 
-        // Agregar el mismo producto dos veces suma la cantidad, no duplica el item
+        // si ya esta el producto, suma la cantidad
         int cantidadFinal = cantidad;
         if (itemExistente != null) {
             cantidadFinal = itemExistente.getCantidad() + cantidad;
@@ -127,7 +127,7 @@ public class CarritoUseCase {
         return carritoGateway.guardarCarrito(carrito);
     }
 
-    // La compra: valida usuario, stock y saldo antes de tocar nada
+    // valido todo antes de tocar saldo o stock
     public Carrito comprar(Long idUsuario) {
         Carrito carrito = consultarCarrito(idUsuario);
 
@@ -141,7 +141,7 @@ public class CarritoUseCase {
             throw new NoEncontradoException("El usuario no existe");
         }
 
-        // Primero se comprueba TODO el inventario, para no dejar la compra a medias
+        // reviso todo el stock primero
         List<Producto> productos = new ArrayList<>();
 
         for (ItemCarrito item : carrito.getItems()) {
@@ -156,10 +156,10 @@ public class CarritoUseCase {
             throw new ValidacionNegocioException("Saldo insuficiente");
         }
 
-        // El descuento de saldo lo hace auth, que es el dueno del dinero
+        // el saldo lo descuenta auth
         usuarioGateway.descontarSaldo(idUsuario, carrito.getTotal());
 
-        // Ya cobrado, se descuenta el inventario
+        // ya cobrado, bajo el stock
         for (int i = 0; i < carrito.getItems().size(); i++) {
             ItemCarrito item = carrito.getItems().get(i);
             Producto producto = productos.get(i);
@@ -203,7 +203,7 @@ public class CarritoUseCase {
         }
     }
 
-    // El total siempre se calcula en el servidor, nunca llega desde el cliente
+    // el total se calcula aca, no llega del cliente
     private void calcularTotal(Carrito carrito) {
         double total = 0.0;
 

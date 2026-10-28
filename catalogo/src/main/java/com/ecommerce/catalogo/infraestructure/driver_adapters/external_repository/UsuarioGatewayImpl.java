@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-// Adaptador que consume las APIs del microservicio de autenticacion
+// llama a las apis de auth
 @Component
 @RequiredArgsConstructor
 public class UsuarioGatewayImpl implements UsuarioGateway {
@@ -41,8 +41,7 @@ public class UsuarioGatewayImpl implements UsuarioGateway {
     @Override
     public void descontarSaldo(Long idUsuario, Double monto) {
         try {
-            // Auth responde 200 tanto si descuenta como si rechaza por regla de negocio:
-            // si descuenta devuelve el usuario en JSON, si rechaza devuelve el motivo en texto.
+            // auth responde 200 igual, si rechaza manda texto y no json
             ResponseEntity<String> respuesta = restTemplate.exchange(
                     authUrl + "/saldo/descontar/" + idUsuario + "/" + monto,
                     HttpMethod.PUT, null, String.class);

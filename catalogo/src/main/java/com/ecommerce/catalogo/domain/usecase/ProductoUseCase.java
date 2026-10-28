@@ -47,7 +47,7 @@ public class ProductoUseCase {
         productoGateway.eliminarPorIdProducto(idProducto);
     }
 
-    // Reglas de negocio del producto
+    // reglas del producto
     private void validarProducto(Producto producto) {
 
         if (producto.getNombre() == null || producto.getNombre().trim().isEmpty()) {

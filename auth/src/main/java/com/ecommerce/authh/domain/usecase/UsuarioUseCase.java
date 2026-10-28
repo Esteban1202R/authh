@@ -40,7 +40,7 @@ public class UsuarioUseCase {
         String claveEncriptada = encrypterGateway.encrypt(usuario.getClave());
         usuario.setClave(claveEncriptada);
 
-        // El saldo no se asigna desde el CRUD: todo usuario nuevo nace en cero
+        // saldo en 0
         usuario.setSaldo(0.0);
 
         Usuario usuarioGuardado = usuarioGateway.guardarUsuario(usuario);
@@ -72,7 +72,6 @@ public class UsuarioUseCase {
         String claveEncriptada = encrypterGateway.encrypt(usuario.getClave());
         usuario.setClave(claveEncriptada);
 
-        // El CRUD no puede tocar el saldo: se conserva el que ya tenia
         usuario.setSaldo(usuarioExistente.getSaldo());
 
         return usuarioGateway.ActualizarUsuario(usuario);
@@ -108,7 +107,7 @@ public class UsuarioUseCase {
         return usuarioGateway.ActualizarUsuario(usuario);
     }
 
-    // Comprobaciones que comparten recargar y descontar
+
     private Usuario buscarUsuarioParaSaldo(Long idUsuario, Double monto) {
         Usuario usuario = usuarioGateway.buscarPorIdUsuario(idUsuario);
 

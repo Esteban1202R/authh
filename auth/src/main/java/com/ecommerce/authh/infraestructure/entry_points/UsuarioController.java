@@ -4,7 +4,9 @@ import com.ecommerce.authh.domain.exception.NoEncontradoException;
 import com.ecommerce.authh.domain.exception.ValidacionNegocioException;
 import com.ecommerce.authh.domain.model.Usuario;
 import com.ecommerce.authh.domain.usecase.UsuarioUseCase;
-import com.ecommerce.authh.infraestructure.driver_adapters.UsuarioData;
+import com.ecommerce.authh.infraestructure.entry_points.dto.LoginRequest;
+import com.ecommerce.authh.infraestructure.entry_points.dto.UsuarioRequest;
+import com.ecommerce.authh.infraestructure.entry_points.dto.UsuarioResponse;
 import com.ecommerce.authh.infraestructure.mapper.MapperUsuario;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,31 +22,30 @@ public class UsuarioController {
     private final MapperUsuario mapperUsuario;
 
     @PostMapping("/save")
-    public ResponseEntity<?> saveUsuario(@RequestBody UsuarioData usuarioData){
+    public ResponseEntity<?> saveUsuario(@RequestBody UsuarioRequest peticion){
         try{
-            Usuario usuario = mapperUsuario.toUsuario(usuarioData);
+            Usuario usuario = mapperUsuario.toUsuario(peticion);
             Usuario usuarioValidadoGuardado = usuarioUseCase.guardarUsuario(usuario);
 
             if(usuarioValidadoGuardado.getId() != null){
-                return new ResponseEntity<>(usuarioValidadoGuardado, HttpStatus.OK);
+                return new ResponseEntity<>(mapperUsuario.toResponse(usuarioValidadoGuardado), HttpStatus.OK);
             }
 
-            return new ResponseEntity<>(usuarioValidadoGuardado, HttpStatus.CONFLICT);
+            return new ResponseEntity<>(mapperUsuario.toResponse(usuarioValidadoGuardado), HttpStatus.CONFLICT);
         } catch (ValidacionNegocioException reglaDeNegocio){
-            // El sistema valido bien: se informa el motivo con 200
             return new ResponseEntity<>(reglaDeNegocio.getMessage(), HttpStatus.OK);
         }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Usuario> findByIdUsuario(@PathVariable Long id){
+    public ResponseEntity<UsuarioResponse> findByIdUsuario(@PathVariable Long id){
         Usuario usuarioValidadoEncontrado = usuarioUseCase.buscarPorIdUsuario(id);
 
         if(usuarioValidadoEncontrado.getId() != null){
-            return new ResponseEntity<>(usuarioValidadoEncontrado, HttpStatus.OK);
+            return new ResponseEntity<>(mapperUsuario.toResponse(usuarioValidadoEncontrado), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(usuarioValidadoEncontrado, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(mapperUsuario.toResponse(usuarioValidadoEncontrado), HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
@@ -58,11 +59,11 @@ public class UsuarioController {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<Usuario> updateUsuario(@RequestBody UsuarioData usuarioData){
+    public ResponseEntity<UsuarioResponse> updateUsuario(@RequestBody UsuarioRequest peticion){
         try{
-            Usuario usuario = mapperUsuario.toUsuario(usuarioData);
+            Usuario usuario = mapperUsuario.toUsuario(peticion);
             Usuario usuarioValidadActualizado = usuarioUseCase.actualizaUsuario(usuario);
-            return new ResponseEntity<>(usuarioValidadActualizado, HttpStatus.OK);
+            return new ResponseEntity<>(mapperUsuario.toResponse(usuarioValidadActualizado), HttpStatus.OK);
         }catch (Exception error){
             return ResponseEntity.notFound().build();
         }
@@ -71,9 +72,9 @@ public class UsuarioController {
 //el requestbody convierte la informacion del Json a objeto la que se trae de postman
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUsuario(@RequestBody UsuarioData usuarioData){
+    public ResponseEntity<?> loginUsuario(@RequestBody LoginRequest peticion){
         try{
-            String mensajeRespuesta = usuarioUseCase.loginUsuario(usuarioData.getCorreo(),usuarioData.getClave());
+            String mensajeRespuesta = usuarioUseCase.loginUsuario(peticion.getCorreo(), peticion.getClave());
             return new ResponseEntity<>(mensajeRespuesta, HttpStatus.OK);
         } catch (Exception error){
             return new ResponseEntity<>("Falló el logueo", HttpStatus.OK);
@@ -94,7 +95,7 @@ public class UsuarioController {
     public ResponseEntity<?> recargarSaldo(@PathVariable Long id, @PathVariable Double monto){
         try{
             Usuario usuario = usuarioUseCase.recargarSaldo(id, monto);
-            return new ResponseEntity<>(usuario, HttpStatus.OK);
+            return new ResponseEntity<>(mapperUsuario.toResponse(usuario), HttpStatus.OK);
         } catch (ValidacionNegocioException reglaDeNegocio){
             return new ResponseEntity<>(reglaDeNegocio.getMessage(), HttpStatus.OK);
         } catch (NoEncontradoException noExiste){
@@ -106,7 +107,7 @@ public class UsuarioController {
     public ResponseEntity<?> descontarSaldo(@PathVariable Long id, @PathVariable Double monto){
         try{
             Usuario usuario = usuarioUseCase.descontarSaldo(id, monto);
-            return new ResponseEntity<>(usuario, HttpStatus.OK);
+            return new ResponseEntity<>(mapperUsuario.toResponse(usuario), HttpStatus.OK);
         } catch (ValidacionNegocioException reglaDeNegocio){
             return new ResponseEntity<>(reglaDeNegocio.getMessage(), HttpStatus.OK);
         } catch (NoEncontradoException noExiste){

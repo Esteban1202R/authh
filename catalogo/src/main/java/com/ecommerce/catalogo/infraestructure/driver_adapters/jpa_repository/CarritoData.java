@@ -27,8 +27,7 @@ public class CarritoData {
 
     private Double total;
 
-    // Un carrito tiene muchos items. cascade + orphanRemoval hacen que los items
-    // se guarden y se borren junto con su carrito.
+    // los items se guardan y se borran con el carrito
     @OneToMany(mappedBy = "carrito", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<ItemCarritoData> items = new ArrayList<>();
 }

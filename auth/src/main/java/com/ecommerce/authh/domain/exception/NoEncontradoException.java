@@ -1,6 +1,6 @@
 package com.ecommerce.authh.domain.exception;
 
-// El recurso que se pidio no existe. Eso si es un error de la peticion.
+// no existe el recurso, va con 404
 public class NoEncontradoException extends RuntimeException {
     public NoEncontradoException(String message) {
         super(message);
